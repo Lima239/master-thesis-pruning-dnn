@@ -1,30 +1,20 @@
 import numpy as np
 from mip import Model, xsum, BINARY, maximize
+import torch
 
-# def dfs(i, visited, adjacency_matrix, n, curr_cluster):
-#     visited[i] = True
-#     curr_cluster.append(i)
-#
-#     for j in range(n):
-#         if adjacency_matrix[i, j] == 1 and not visited[j]:
-#             dfs(i, visited, adjacency_matrix, n, curr_cluster)
+def permute_rows_based_on_clusters(M, clusters):
+    ordered_indices = [row_index for cluster in clusters for row_index in cluster]
+    return M[ordered_indices, :]
 
-
-# def find_clusters(adjacency_matrix):
-#     n = adjacency_matrix.shape[0]
-#     visited = [False] * n
-#     clusters = []
-#
-#     for i in range(n):
-#         if not visited[i]:
-#             curr_cluster = []
-#             dfs(i, visited, adjacency_matrix, n, curr_cluster)
-#             clusters.append(curr_cluster)
-#
-#     return clusters
+def permute_columns_based_on_clusters(M, clusters):
+    ordered_indices = [column_index for cluster in clusters for column_index in cluster]
+    return M[:, ordered_indices]
 
 def correlation_clustering(X):
     correlation_matrix = np.corrcoef(X)
+
+    print("Correlation Matrix")
+    print(correlation_matrix)
 
     n = correlation_matrix.shape[0]
 
@@ -56,6 +46,9 @@ def correlation_clustering(X):
                for j in range(k) for i in range(n) for i2 in range(i + 1, n))
 
     m.objective = obj
+
+    m.max_seconds = 4000
+    #m.gap = 0.05
     m.optimize()
 
     clusters = [[] for _ in range(k)]
@@ -67,17 +60,21 @@ def correlation_clustering(X):
     return clusters
 
 if __name__ == "__main__":
-    X = np.array([[1.0, 0.2, 0.1, 0.5, 0.3, 1.0, 0.2, 0.1, 0.5],
-                  [1.0, 0.2, 0.1, 0.5, 0.3, 1.0, 0.2, 0.1, 0.5],
-                  [0.1, 0.4, 1.0, 0.6, 0.2, 0.1, 0.4, 1.0, 0.6],
-                  [0.5, 0.3, 0.6, 1.0, 0.4, 0.5, 0.3, 0.6, 1.0],
-                  [0.3, 0.7, 0.2, 0.4, 1.0, 0.3, 0.7, 0.2, 0.4],
-                  [4.0, 0.2, 0.1, 0.5, 0.3, 1.0, 2.2, 0.1, 0.5],
-                  [1.0, 0.2, 3.1, 3.5, 2.3, 1.0, 0.2, 0.6, 4.5],
-                  [0.1, 3.4, 1.0, 1.6, 2.2, 3.1, 0.4, 1.6, 0.6],
-                  [4.5, 0.3, 0.6, 1.0, 2.4, 0.5, 0.3, 0.6, 4.0]])
+    # X = np.array([[1.0, 0.2, 0.1, 0.5, 0.3, 1.0, 0.2, 0.1, 0.5],
+    #               [1.0, 0.2, 0.1, 0.5, 0.3, 1.0, 0.2, 0.1, 0.5],
+    #               [0.1, 0.4, 1.0, 0.6, 0.2, 0.1, 0.4, 1.0, 0.6],
+    #               [0.5, 0.3, 0.6, 1.0, 0.4, 0.5, 0.3, 0.6, 1.0],
+    #               [0.3, 0.7, 0.2, 0.4, 1.0, 0.3, 0.7, 0.2, 0.4],
+    #               [4.0, 0.2, 0.1, 0.5, 0.3, 1.0, 2.2, 0.1, 0.5],
+    #               [1.0, 0.2, 3.1, 3.5, 2.3, 1.0, 0.2, 0.6, 4.5],
+    #               [0.1, 3.4, 1.0, 1.6, 2.2, 3.1, 0.4, 1.6, 0.6],
+    #               [4.5, 0.3, 0.6, 1.0, 2.4, 0.5, 0.3, 0.6, 4.0]])
+
+    X = torch.load('../inputs/real_weights/pytorch_weights_36x36.pt')
 
     row_clusters = correlation_clustering(X.T)
+    X = permute_rows_based_on_clusters(X, row_clusters)
     column_clusters = correlation_clustering(X)
+    X = permute_columns_based_on_clusters(X, column_clusters)
 
-    print(row_clusters)
+    torch.save(X, '../inputs/real_weights/pytorch_weights_36x36_clustered.pt')
