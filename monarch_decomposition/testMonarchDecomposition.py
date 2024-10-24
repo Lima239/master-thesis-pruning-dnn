@@ -24,8 +24,14 @@ def monarch_decomposition_analysis(M):
     print('\nReconstructed 2 matrix from monarch decomposition:')
     print(M_transformed)
 
+    error_matrix = M - M_transformed
+    error = torch.norm(error_matrix, p='fro') ** 2
+
+    print('\nError of the matrix is:')
+    print(error)
 
 if __name__ == "__main__":
-    input_matrix_path = 'inputs/test_matrices/9x9.pt'
+    input_matrix_path = 'inputs/real_weights/pytorch_weights_36x36_clustered.pt'
+
     M = torch.load(input_matrix_path)
     monarch_decomposition_analysis(M)
