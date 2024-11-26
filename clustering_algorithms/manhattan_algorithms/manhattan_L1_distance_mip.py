@@ -1,6 +1,8 @@
 import numpy as np
 from mip import Model, xsum, BINARY, CONTINUOUS, maximize
 import torch
+import sys
+import os
 
 def permute_rows_based_on_clusters(M, clusters):
     ordered_indices = [row_index for cluster in clusters for row_index in cluster]
@@ -20,7 +22,7 @@ def manhattan_distance_matrix(X):
             manhattan_matrix[j, i] = dist
     return manhattan_matrix
 
-def clustering_with_manhattan(X):
+def clustering_with_manhattan(X, len_of_run):
     distance_matrix = manhattan_distance_matrix(X)
 
     print("Manhattan Distance Matrix")
@@ -56,7 +58,7 @@ def clustering_with_manhattan(X):
 
     m.objective = obj
 
-    m.max_seconds = 100
+    m.max_seconds = len_of_run
     # m.gap = 0.05
     m.optimize()
 
@@ -69,13 +71,29 @@ def clustering_with_manhattan(X):
     return clusters
 
 if __name__ == "__main__":
-    # X = np.array(...)  # Example data
+    if len(sys.argv) < 2:
+        print("Usage: python3 abs_correlation_mip.py <input_file_path>")
+    else:
+        input_path = sys.argv[1]
+        print("manhattan_L1_distance_mip.py")
+        print(input_path)
 
-    X = torch.load('../inputs/real_weights/pytorch_weights_36x36.pt')
+        X = torch.load(input_path)
+        len_of_run = 4000 # in seconds
+        #gap_of_run = 10
 
-    row_clusters = clustering_with_manhattan(X.T)
-    X = permute_rows_based_on_clusters(X, row_clusters)
-    column_clusters = clustering_with_manhattan(X)
-    X = permute_columns_based_on_clusters(X, column_clusters)
+        row_clusters = clustering_with_manhattan(X.T, len_of_run)
+        X = permute_rows_based_on_clusters(X, row_clusters)
+        column_clusters = clustering_with_manhattan(X, len_of_run)
+        X = permute_columns_based_on_clusters(X, column_clusters)
 
-    torch.save(X, '../inputs/real_weights/pytorch_weights_36x36_manhattan.pt')
+        # saving clustered matrix
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        output_dir = os.path.join(script_dir, "output")
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        file_name = os.path.splitext(os.path.basename(input_path))[0]
+        save_name = f"{file_name}_{len_of_run}.pt"
+
+        save_path = os.path.join(output_dir, save_name)
+        torch.save(X, save_path)

@@ -1,6 +1,8 @@
 import numpy as np
-from mip import Model, xsum, BINARY, maximize
+from mip import Model, xsum, BINARY, CONTINUOUS, maximize
 import torch
+import sys
+import os
 
 def permute_rows_based_on_clusters(M, clusters):
     ordered_indices = [row_index for cluster in clusters for row_index in cluster]
@@ -10,14 +12,12 @@ def permute_columns_based_on_clusters(M, clusters):
     ordered_indices = [column_index for cluster in clusters for column_index in cluster]
     return M[:, ordered_indices]
 
-def correlation_clustering(X):
+def correlation_clustering(X, len_of_run):
     correlation_matrix = np.corrcoef(X)
 
     print("Correlation Matrix")
-    print(correlation_matrix)
 
     n = correlation_matrix.shape[0]
-
     # number of clusters
     k = int(np.sqrt(n))
     m = Model(sense=maximize)
@@ -47,7 +47,7 @@ def correlation_clustering(X):
 
     m.objective = obj
 
-    m.max_seconds = 4000
+    m.max_seconds = len_of_run
     #m.gap = 0.05
     m.optimize()
 
@@ -60,6 +60,34 @@ def correlation_clustering(X):
     return clusters
 
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python3 abs_correlation_mip.py <input_file_path>")
+    else:
+        input_path = sys.argv[1]
+        print("abs_correlation_mip.py")
+        print(input_path)
+
+        X = torch.load(input_path)
+        len_of_run = 4000 # in seconds
+        #gap_of_run = 10
+
+        row_clusters = correlation_clustering(X.T, len_of_run)
+        X = permute_rows_based_on_clusters(X, row_clusters)
+        column_clusters = correlation_clustering(X, len_of_run)
+        X = permute_columns_based_on_clusters(X, column_clusters)
+
+        # saving clustered matrix
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        output_dir = os.path.join(script_dir, "output")
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        file_name = os.path.splitext(os.path.basename(input_path))[0]
+        save_name = f"{file_name}_{len_of_run}.pt"
+
+        save_path = os.path.join(output_dir, save_name)
+        torch.save(X, save_path)
+
+
     # X = np.array([[1.0, 0.2, 0.1, 0.5, 0.3, 1.0, 0.2, 0.1, 0.5],
     #               [1.0, 0.2, 0.1, 0.5, 0.3, 1.0, 0.2, 0.1, 0.5],
     #               [0.1, 0.4, 1.0, 0.6, 0.2, 0.1, 0.4, 1.0, 0.6],
@@ -69,12 +97,3 @@ if __name__ == "__main__":
     #               [1.0, 0.2, 3.1, 3.5, 2.3, 1.0, 0.2, 0.6, 4.5],
     #               [0.1, 3.4, 1.0, 1.6, 2.2, 3.1, 0.4, 1.6, 0.6],
     #               [4.5, 0.3, 0.6, 1.0, 2.4, 0.5, 0.3, 0.6, 4.0]])
-
-    X = torch.load('../inputs/real_weights/pytorch_weights_36x36.pt')
-
-    row_clusters = correlation_clustering(X.T)
-    X = permute_rows_based_on_clusters(X, row_clusters)
-    column_clusters = correlation_clustering(X)
-    X = permute_columns_based_on_clusters(X, column_clusters)
-
-    torch.save(X, '../inputs/real_weights/pytorch_weights_36x36_clustered.pt')
