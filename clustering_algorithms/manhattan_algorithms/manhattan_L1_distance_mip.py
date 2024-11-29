@@ -25,8 +25,8 @@ def manhattan_distance_matrix(X):
 def clustering_with_manhattan(X, len_of_run):
     distance_matrix = manhattan_distance_matrix(X)
 
-    print("Manhattan Distance Matrix")
-    print(distance_matrix)
+#    print("Manhattan Distance Matrix")
+#    print(distance_matrix)
 
     n = distance_matrix.shape[0]
 
@@ -53,7 +53,8 @@ def clustering_with_manhattan(X, len_of_run):
                 m += z[i][i2][j] <= x[i2][j]
                 m += z[i][i2][j] >= x[i][j] + x[i2][j] - 1
 
-    obj = xsum(-distance_matrix[i][i2] * z[i][i2][j]  # minimizing distance by maximizing negative
+    # minimizing distance by maximizing negative
+    obj = xsum(-distance_matrix[i][i2] * z[i][i2][j]
                for j in range(k) for i in range(n) for i2 in range(i + 1, n))
 
     m.objective = obj
@@ -72,7 +73,7 @@ def clustering_with_manhattan(X, len_of_run):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python3 abs_correlation_mip.py <input_file_path>")
+        print("Usage: python3 manhattan_L1_distance_mip.py.py <input_file_path>")
     else:
         input_path = sys.argv[1]
         print("manhattan_L1_distance_mip.py")

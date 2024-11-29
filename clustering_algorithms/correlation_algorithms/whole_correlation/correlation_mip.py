@@ -13,20 +13,13 @@ def permute_columns_based_on_clusters(M, clusters):
     return M[:, ordered_indices]
 
 def correlation_clustering(X, len_of_run):
-    n = X.shape[0]
+    correlation_matrix = np.corrcoef(X)
+
+    # print("Correlation Matrix")
+    # n = correlation_matrix.shape[0]
 
     # number of clusters
     k = int(np.sqrt(n))
-
-    submatrices = [X[:, i * k:(i + 1) * k] for i in range(k)]
-    correlation_matrices = [np.corrcoef(submatrix) for submatrix in submatrices]
-
-    average_correlation_matrix = sum(correlation_matrices) / len(correlation_matrices)
-
-    print("Average correlation Matrix")
-    print(average_correlation_matrix)
-
-    n = average_correlation_matrix.shape[0]
     m = Model(sense=maximize)
 
     x = [[m.add_var(var_type=BINARY) for j in range(k)] for i in range(n)]
@@ -49,7 +42,7 @@ def correlation_clustering(X, len_of_run):
                 m += z[i][i2][j] <= x[i2][j]
                 m += z[i][i2][j] >= x[i][j] + x[i2][j] - 1
 
-    obj = xsum(average_correlation_matrix[i][i2] * z[i][i2][j]
+    obj = xsum(correlation_matrix[i][i2] * z[i][i2][j]
                for j in range(k) for i in range(n) for i2 in range(i + 1, n))
 
     m.objective = obj
@@ -68,10 +61,10 @@ def correlation_clustering(X, len_of_run):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python3 abs_correlation_blocks.py <input_file_path>")
+        print("Usage: python3 correlation_mip.py <input_file_path>")
     else:
         input_path = sys.argv[1]
-        print("abs_correlation_blocks.py")
+        print("correlation_mip.py")
         print(input_path)
 
         X = torch.load(input_path)
@@ -93,3 +86,14 @@ if __name__ == "__main__":
 
         save_path = os.path.join(output_dir, save_name)
         torch.save(X, save_path)
+
+
+    # X = np.array([[1.0, 0.2, 0.1, 0.5, 0.3, 1.0, 0.2, 0.1, 0.5],
+    #               [1.0, 0.2, 0.1, 0.5, 0.3, 1.0, 0.2, 0.1, 0.5],
+    #               [0.1, 0.4, 1.0, 0.6, 0.2, 0.1, 0.4, 1.0, 0.6],
+    #               [0.5, 0.3, 0.6, 1.0, 0.4, 0.5, 0.3, 0.6, 1.0],
+    #               [0.3, 0.7, 0.2, 0.4, 1.0, 0.3, 0.7, 0.2, 0.4],
+    #               [4.0, 0.2, 0.1, 0.5, 0.3, 1.0, 2.2, 0.1, 0.5],
+    #               [1.0, 0.2, 3.1, 3.5, 2.3, 1.0, 0.2, 0.6, 4.5],
+    #               [0.1, 3.4, 1.0, 1.6, 2.2, 3.1, 0.4, 1.6, 0.6],
+    #               [4.5, 0.3, 0.6, 1.0, 2.4, 0.5, 0.3, 0.6, 4.0]])
