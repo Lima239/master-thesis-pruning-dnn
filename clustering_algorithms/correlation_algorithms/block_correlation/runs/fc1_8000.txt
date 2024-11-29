@@ -1,0 +1,143 @@
+Set parameter Username
+Academic license - for non-commercial use only - expires 2025-10-16
+Set parameter TimeLimit to value 4000
+Set parameter NodeLimit to value 1073741824
+Set parameter SolutionLimit to value 1073741824
+Set parameter IntFeasTol to value 1e-06
+Set parameter Method to value 3
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (mac64[arm] - Darwin 23.2.0 23C71)
+
+CPU model: Apple M1
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 87570 rows, 59778 columns and 205578 nonzeros
+Model fingerprint: 0xded12ddf
+Variable types: 0 continuous, 59778 integer (59778 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [8e-05, 5e-01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 9e+00]
+Found heuristic solution: objective -5.5553556
+Presolve removed 43137 rows and 29889 columns
+Presolve time: 0.46s
+Presolved: 44433 rows, 29889 columns, 104121 nonzeros
+Variable types: 0 continuous, 29889 integer (29889 binary)
+
+Use crossover to convert LP symmetric solution to basic solution...
+
+Root relaxation: objective -2.016852e+02, 643 iterations, 0.13 seconds (0.21 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 -201.68520    0 15912   -5.55536 -201.68520  3530%     -    2s
+H    0     0                     -14.9615720 -201.68520  1248%     -    4s
+     0     0 -131.10292    0 8451  -14.96157 -131.10292   776%     -   40s
+     0     0 -114.36917    0 7198  -14.96157 -114.36917   664%     -   79s
+     0     0 -110.38423    0 7302  -14.96157 -110.38423   638%     -  121s
+H    0     0                     -15.9332248 -106.18862   566%     -  382s
+     0     0  -85.26808    0 7360  -15.93322  -85.26808   435%     -  382s
+     0     0  -85.26808    0 7301  -15.93322  -85.26808   435%     -  472s
+     0     0  -85.26808    0 7543  -15.93322  -85.26808   435%     - 1471s
+     0     0  -85.26808    0 8031  -15.93322  -85.26808   435%     - 2143s
+     0     0  -85.26808    0 8393  -15.93322  -85.26808   435%     - 2262s
+     0     0  -81.90025    0 8957  -15.93322  -81.90025   414%     - 2426s
+     0     0  -80.62748    0 9412  -15.93322  -80.62748   406%     - 3502s
+     0     0          -    0       -15.93322  -80.62748   406%     - 4478s
+
+Cutting planes:
+  RLT: 3148
+  BQP: 8822
+
+Explored 1 nodes (599688 simplex iterations) in 4478.51 seconds (1351.60 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 3: -15.9332 -14.9616 -5.55536 
+
+Time limit reached
+Best objective -1.593322475318e+01, best bound -8.062747942640e+01, gap 406.0337%
+Set parameter Username
+Academic license - for non-commercial use only - expires 2025-10-16
+Set parameter TimeLimit to value 4000
+Set parameter NodeLimit to value 1073741824
+Set parameter SolutionLimit to value 1073741824
+Set parameter IntFeasTol to value 1e-06
+Set parameter Method to value 3
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (mac64[arm] - Darwin 23.2.0 23C71)
+
+CPU model: Apple M1
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 87570 rows, 59778 columns and 205578 nonzeros
+Model fingerprint: 0xf2b09938
+Variable types: 0 continuous, 59778 integer (59778 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [8e-06, 6e-01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 9e+00]
+Found heuristic solution: objective 3.5924385
+Presolve removed 43974 rows and 29889 columns
+Presolve time: 0.47s
+Presolved: 43596 rows, 29889 columns, 103284 nonzeros
+Variable types: 0 continuous, 29889 integer (29889 binary)
+
+Use crossover to convert LP symmetric solution to basic solution...
+
+Root relaxation: objective -1.775693e+02, 643 iterations, 0.13 seconds (0.22 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 -177.56927    0 15075    3.59244 -177.56927  5043%     -    2s
+H    0     0                     -12.1635051 -177.56927  1360%     -    2s
+     0     0 -113.15521    0 7852  -12.16351 -113.15521   830%     -   38s
+     0     0  -97.64944    0 6483  -12.16351  -97.64944   703%     -   83s
+     0     0  -93.40648    0 6512  -12.16351  -93.40648   668%     -  129s
+     0     0  -75.60317    0 6589  -12.16351  -75.60317   522%     - 1127s
+     0     0  -75.59710    0 6684  -12.16351  -75.59710   522%     - 1205s
+     0     0  -75.59710    0 7082  -12.16351  -75.59710   522%     - 2218s
+     0     0          -    0       -12.16351  -75.59710   522%     - 4198s
+
+Cutting planes:
+  RLT: 3188
+  BQP: 8423
+
+Explored 1 nodes (308850 simplex iterations) in 4199.09 seconds (632.16 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 2: -12.1635 3.59244 
+
+Time limit reached
+Best objective -1.216350506518e+01, best bound -7.559710377667e+01, gap 521.5076%
+abs_correlation_blocks.py
+inputs/real_weights/fc1_81x81.pt
+Average correlation Matrix
+[[ 1.         -0.09959857 -0.14966926 ...  0.0617008   0.12277127
+  -0.01751527]
+ [-0.09959857  1.          0.118543   ... -0.02886682  0.01420526
+   0.12493859]
+ [-0.14966926  0.118543    1.         ... -0.15359829  0.07356405
+   0.10708393]
+ ...
+ [ 0.0617008  -0.02886682 -0.15359829 ...  1.         -0.03982289
+   0.11119086]
+ [ 0.12277127  0.01420526  0.07356405 ... -0.03982289  1.
+   0.11830987]
+ [-0.01751527  0.12493859  0.10708393 ...  0.11119086  0.11830987
+   1.        ]]
+Average correlation Matrix
+[[ 1.          0.03646591 -0.04640137 ...  0.10408577  0.12243831
+  -0.0572443 ]
+ [ 0.03646591  1.          0.0057278  ... -0.17941226  0.09298522
+  -0.18779536]
+ [-0.04640137  0.0057278   1.         ... -0.14730369  0.05362254
+   0.15750685]
+ ...
+ [ 0.10408577 -0.17941226 -0.14730369 ...  1.          0.00323833
+  -0.04646568]
+ [ 0.12243831  0.09298522  0.05362254 ...  0.00323833  1.
+  -0.11002993]
+ [-0.0572443  -0.18779536  0.15750685 ... -0.04646568 -0.11002993
+   1.        ]]

@@ -1,0 +1,155 @@
+Set parameter Username
+Academic license - for non-commercial use only - expires 2025-10-16
+Set parameter TimeLimit to value 4000
+Set parameter NodeLimit to value 1073741824
+Set parameter SolutionLimit to value 1073741824
+Set parameter IntFeasTol to value 1e-06
+Set parameter Method to value 3
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (mac64[arm] - Darwin 23.2.0 23C71)
+
+CPU model: Apple M1
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 87570 rows, 59778 columns and 205578 nonzeros
+Model fingerprint: 0x2b1e8cbd
+Variable types: 0 continuous, 59778 integer (59778 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [4e+00, 8e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 9e+00]
+Found heuristic solution: objective -1902.994564
+Presolve removed 29160 rows and 29889 columns
+Presolve time: 0.50s
+Presolved: 58410 rows, 29889 columns, 118098 nonzeros
+Variable types: 0 continuous, 29889 integer (29889 binary)
+
+Concurrent LP optimizer: primal simplex, dual simplex, and barrier
+Showing barrier log only...
+
+
+Use crossover to convert LP symmetric solution to basic solution...
+
+Solved with primal simplex
+
+Root relaxation: objective -1.901296e+04, 643 iterations, 0.21 seconds (0.29 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 -19012.964    0 29889 -1902.9946 -19012.964   899%     -    3s
+H    0     0                    -1920.701993 -19012.964   890%     -    6s
+H    0     0                    -1936.692077 -19012.964   882%     -   11s
+H    0     0                    -1944.559199 -19012.964   878%     -   13s
+     0     0 -14446.282    0 22122 -1944.5592 -14446.282   643%     - 1138s
+H    0     0                    -1945.732690 -9703.8739   399%     - 1201s
+     0     0 -9703.8739    0 15330 -1945.7327 -9703.8739   399%     - 1202s
+     0     0 -5251.7623    0 8533 -1945.7327 -5251.7623   170%     - 1249s
+     0     0 -3676.5666    0 6345 -1945.7327 -3676.5666  89.0%     - 2275s
+H    0     0                    -1952.860028 -3676.5666  88.3%     - 2286s
+     0     0 -2274.5942    0 3962 -1952.8600 -2274.5942  16.5%     - 3409s
+H    0     0                    -1954.342440 -2194.1228  12.3%     - 3453s
+     0     0 -2194.1228    0 3923 -1954.3424 -2194.1228  12.3%     - 3454s
+     0     0 -2130.8417    0 3702 -1954.3424 -2130.8417  9.03%     - 3471s
+     0     0 -2130.8416    0 3699 -1954.3424 -2130.8416  9.03%     - 3472s
+     0     0 -2130.6860    0 3767 -1954.3424 -2130.6860  9.02%     - 3478s
+     0     0 -2130.6852    0 3767 -1954.3424 -2130.6852  9.02%     - 3478s
+
+Cutting planes:
+  Cover: 123
+  Clique: 106
+  Zero half: 27
+  Mod-K: 2
+  RLT: 836
+  BQP: 6
+  PSD: 14
+
+Explored 1 nodes (376373 simplex iterations) in 4531.77 seconds (901.17 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 7: -1954.34 -1952.86 -1945.73 ... -1902.99
+
+Time limit reached
+Best objective -1.954342440128e+03, best bound -2.130685221185e+03, gap 9.0231%
+Set parameter Username
+Academic license - for non-commercial use only - expires 2025-10-16
+Set parameter TimeLimit to value 4000
+Set parameter NodeLimit to value 1073741824
+Set parameter SolutionLimit to value 1073741824
+Set parameter IntFeasTol to value 1e-06
+Set parameter Method to value 3
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (mac64[arm] - Darwin 23.2.0 23C71)
+
+CPU model: Apple M1
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 87570 rows, 59778 columns and 205578 nonzeros
+Model fingerprint: 0xc3ab15b0
+Variable types: 0 continuous, 59778 integer (59778 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [4e+00, 1e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 9e+00]
+Found heuristic solution: objective -1888.091792
+Presolve removed 29160 rows and 29889 columns
+Presolve time: 0.52s
+Presolved: 58410 rows, 29889 columns, 118098 nonzeros
+Variable types: 0 continuous, 29889 integer (29889 binary)
+
+Concurrent LP optimizer: primal simplex, dual simplex, and barrier
+Showing barrier log only...
+
+
+Use crossover to convert LP symmetric solution to basic solution...
+
+Solved with dual simplex
+
+Root relaxation: objective -1.893869e+04, 643 iterations, 0.22 seconds (0.29 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 -18938.689    0 29889 -1888.0918 -18938.689   903%     -    3s
+H    0     0                    -1903.294934 -18938.689   895%     -    7s
+H    0     0                    -1928.071947 -18938.689   882%     -   12s
+     0     0 -13650.665    0 22178 -1928.0719 -13650.665   608%     - 1193s
+H    0     0                    -1930.947670 -13650.665   607%     - 1240s
+H    0     0                    -1932.964725 -9827.8186   408%     - 2288s
+     0     0 -9827.8186    0 15485 -1932.9647 -9827.8186   408%     - 2290s
+     0     0 -5305.4456    0 8512 -1932.9647 -5305.4456   174%     - 2353s
+     0     0 -3640.6195    0 6313 -1932.9647 -3640.6195  88.3%     - 3143s
+H    0     0                    -1941.954269 -3640.6195  87.5%     - 3154s
+H    0     0                    -1946.214253 -2114.5180  8.65%     - 3279s
+     0     0 -2114.5180    0 3695 -1946.2143 -2114.5180  8.65%     - 3280s
+     0     0 -2114.4538    0 3723 -1946.2143 -2114.4538  8.64%     - 3283s
+
+Cutting planes:
+  Zero half: 7
+  RLT: 741
+
+Explored 1 nodes (381711 simplex iterations) in 4204.78 seconds (937.39 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 7: -1946.21 -1941.95 -1932.96 ... -1888.09
+
+Time limit reached
+Best objective -1.946214253426e+03, best bound -2.114453762946e+03, gap 8.6444%
+manhattan_L1_distance_mip.py
+inputs/real_weights/fc1_81x81.pt
+Manhattan Distance Matrix
+[[0.         6.09707546 5.92496014 ... 5.62788343 5.2355361  6.03357315]
+ [6.09707546 0.         5.42633438 ... 5.59513521 5.967062   6.16238499]
+ [5.92496014 5.42633438 0.         ... 5.76706839 5.39725304 6.04803658]
+ ...
+ [5.62788343 5.59513521 5.76706839 ... 0.         5.74535465 6.40944958]
+ [5.2355361  5.967062   5.39725304 ... 5.74535465 0.         5.71800947]
+ [6.03357315 6.16238499 6.04803658 ... 6.40944958 5.71800947 0.        ]]
+Manhattan Distance Matrix
+[[0.         5.62016153 5.52305984 ... 5.41137886 6.56295252 5.78629827]
+ [5.62016153 0.         5.16267729 ... 5.19424915 5.71266508 5.49418354]
+ [5.52305984 5.16267729 0.         ... 5.40525103 5.90132236 5.56768084]
+ ...
+ [5.41137886 5.19424915 5.40525103 ... 0.         5.20033836 5.72365189]
+ [6.56295252 5.71266508 5.90132236 ... 5.20033836 0.         6.24492264]
+ [5.78629827 5.49418354 5.56768084 ... 5.72365189 6.24492264 0.        ]]
