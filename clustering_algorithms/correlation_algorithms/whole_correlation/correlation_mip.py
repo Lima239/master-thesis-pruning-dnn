@@ -12,14 +12,25 @@ def permute_columns_based_on_clusters(M, clusters):
     ordered_indices = [column_index for cluster in clusters for column_index in cluster]
     return M[:, ordered_indices]
 
-def correlation_clustering(X, len_of_run):
+def permute_matrix_with_clusters(X, clusters, axis=0):
+    n = X.shape[0] if axis == 0 else X.shape[1]
+    ordered_indices = [idx for cluster in clusters for idx in cluster]
+    permutation_matrix = np.eye(n)[ordered_indices]
+    if axis == 0:  # Row permutation
+        return permutation_matrix @ X, permutation_matrix
+    else:  # Column permutation
+        return X @ permutation_matrix.T, permutation_matrix.T
+
+# clustering rows of X matrix
+def correlation_clustering(X, k, len_of_run):
     correlation_matrix = np.corrcoef(X)
 
-    # print("Correlation Matrix")
-    # n = correlation_matrix.shape[0]
+    n = X.shape[0]
+    if n % k != 0:
+        raise ValueError(f"Invalid number of clusters: {k}.")
 
     # number of clusters
-    k = int(np.sqrt(n))
+    # k = int(np.sqrt(n))
     m = Model(sense=maximize)
 
     x = [[m.add_var(var_type=BINARY) for j in range(k)] for i in range(n)]
@@ -59,6 +70,14 @@ def correlation_clustering(X, len_of_run):
 
     return clusters
 
+def clustering_permutation_matrices(X, k, len_of_run):
+    row_clusters = correlation_clustering(X.T, k, len_of_run)
+    X, P_rows = permute_matrix_with_clusters(X, row_clusters, 0)
+    column_clusters = correlation_clustering(X, k, len_of_run)
+    X, P_columns = permute_columns_based_on_clusters(X, column_clusters, 1)
+
+    return P_rows, P_columns
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python3 correlation_mip.py <input_file_path>")
@@ -71,9 +90,11 @@ if __name__ == "__main__":
         len_of_run = 4000 # in seconds
         #gap_of_run = 10
 
-        row_clusters = correlation_clustering(X.T, len_of_run)
+        k = int(np.sqrt(X.shape[0]))
+
+        row_clusters = correlation_clustering(X.T, k, len_of_run)
         X = permute_rows_based_on_clusters(X, row_clusters)
-        column_clusters = correlation_clustering(X, len_of_run)
+        column_clusters = correlation_clustering(X, k, len_of_run)
         X = permute_columns_based_on_clusters(X, column_clusters)
 
         # saving clustered matrix
@@ -86,14 +107,3 @@ if __name__ == "__main__":
 
         save_path = os.path.join(output_dir, save_name)
         torch.save(X, save_path)
-
-
-    # X = np.array([[1.0, 0.2, 0.1, 0.5, 0.3, 1.0, 0.2, 0.1, 0.5],
-    #               [1.0, 0.2, 0.1, 0.5, 0.3, 1.0, 0.2, 0.1, 0.5],
-    #               [0.1, 0.4, 1.0, 0.6, 0.2, 0.1, 0.4, 1.0, 0.6],
-    #               [0.5, 0.3, 0.6, 1.0, 0.4, 0.5, 0.3, 0.6, 1.0],
-    #               [0.3, 0.7, 0.2, 0.4, 1.0, 0.3, 0.7, 0.2, 0.4],
-    #               [4.0, 0.2, 0.1, 0.5, 0.3, 1.0, 2.2, 0.1, 0.5],
-    #               [1.0, 0.2, 3.1, 3.5, 2.3, 1.0, 0.2, 0.6, 4.5],
-    #               [0.1, 3.4, 1.0, 1.6, 2.2, 3.1, 0.4, 1.6, 0.6],
-    #               [4.5, 0.3, 0.6, 1.0, 2.4, 0.5, 0.3, 0.6, 4.0]])
