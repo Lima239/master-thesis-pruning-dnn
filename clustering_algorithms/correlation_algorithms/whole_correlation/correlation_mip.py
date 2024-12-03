@@ -70,7 +70,7 @@ def correlation_clustering(X, k, len_of_run):
 
     return clusters
 
-def clustering_permutation_matrices(X, k, len_of_run):
+def compute_clustering_permutation_matrices(X, k, len_of_run):
     row_clusters = correlation_clustering(X.T, k, len_of_run)
     X, P_rows = permute_matrix_with_clusters(X, row_clusters, 0)
     column_clusters = correlation_clustering(X, k, len_of_run)
