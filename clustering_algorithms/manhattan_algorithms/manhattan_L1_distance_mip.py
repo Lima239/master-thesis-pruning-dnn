@@ -1,5 +1,5 @@
 import numpy as np
-from mip import Model, xsum, BINARY, CONTINUOUS, maximize
+from mip import Model, xsum, BINARY, CONTINUOUS, MAXIMIZE
 import torch
 import sys
 import os
@@ -32,7 +32,7 @@ def clustering_with_manhattan(X, len_of_run):
 
     # Number of clusters
     k = int(np.sqrt(n))
-    m = Model(sense=maximize)
+    m = Model(sense=MAXIMIZE)
 
     x = [[m.add_var(var_type=BINARY) for j in range(k)] for i in range(n)]
     z = [[[m.add_var(var_type=BINARY) for j in range(k)] for i2 in range(n)] for i in range(n)]
@@ -51,7 +51,7 @@ def clustering_with_manhattan(X, len_of_run):
             for j in range(k):
                 m += z[i][i2][j] <= x[i][j]
                 m += z[i][i2][j] <= x[i2][j]
-                m += z[i][i2][j] >= x[i][j] + x[i2][j] - 1
+#                m += z[i][i2][j] >= x[i][j] + x[i2][j] - 1
 
     # minimizing distance by maximizing negative
     obj = xsum(-distance_matrix[i][i2] * z[i][i2][j]
