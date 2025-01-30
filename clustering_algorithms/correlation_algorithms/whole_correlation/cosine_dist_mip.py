@@ -72,10 +72,10 @@ def cosine_clustering(X, k, len_of_run):
 
     return clusters
 
-def compute_clustering_permutation_matrices(X, k, len_of_run):
-    row_clusters = cosine_clustering(X.T, k, len_of_run)
+def compute_clustering_permutation_matrices(X, k_rows, l_columns, len_of_run):
+    row_clusters = cosine_clustering(X.T, k_rows, len_of_run)
     X, P_rows = permute_matrix_with_clusters(X, row_clusters, 0)
-    column_clusters = cosine_clustering(X, k, len_of_run)
+    column_clusters = cosine_clustering(X, l_columns, len_of_run)
     X, P_columns = permute_columns_based_on_clusters(X, column_clusters, 1)
 
     return P_rows, P_columns, X
