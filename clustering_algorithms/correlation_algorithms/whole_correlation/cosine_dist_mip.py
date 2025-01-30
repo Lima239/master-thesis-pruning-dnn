@@ -1,5 +1,5 @@
 import numpy as np
-from mip import Model, xsum, BINARY, CONTINUOUS, MAXIMIZE
+from mip import Model, xsum, BINARY, CONTINUOUS, MAXIMIZE, GRB
 import torch
 import sys
 import os
@@ -33,7 +33,7 @@ def cosine_clustering(X, k, len_of_run):
 
     # number of clusters
     # k = int(np.sqrt(n))
-    m = Model(sense=MAXIMIZE)
+    m = Model(sense=MAXIMIZE, solver_name=GRB)
 
     x = [[m.add_var(var_type=BINARY) for j in range(k)] for i in range(n)]
 
@@ -125,7 +125,7 @@ if __name__ == "__main__":
 
         X = torch.load(input_path)
         print(X.size())
-        len_of_run = 1000 # in seconds
+        len_of_run = 100 # in seconds
         k = int(np.sqrt(X.shape[0]))
 
         row_clusters = cosine_clustering(X.T, k, len_of_run)
