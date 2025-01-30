@@ -1,8 +1,9 @@
 import numpy as np
-from mip import Model, xsum, BINARY, CONTINUOUS, maximize
+from mip import Model, xsum, BINARY, CONTINUOUS, MAXIMIZE
 import torch
 import sys
 import os
+from scipy.spatial.distance import cdist
 
 def permute_rows_based_on_clusters(M, clusters):
     ordered_indices = [row_index for cluster in clusters for row_index in cluster]
@@ -15,15 +16,16 @@ def permute_columns_based_on_clusters(M, clusters):
 def permute_matrix_with_clusters(X, clusters, axis=0):
     n = X.shape[0] if axis == 0 else X.shape[1]
     ordered_indices = [idx for cluster in clusters for idx in cluster]
-    permutation_matrix = np.eye(n)[ordered_indices]
+    permutation_matrix = torch.eye(n, dtype=X.dtype, device=X.device)[ordered_indices]
     if axis == 0:  # Row permutation
         return permutation_matrix @ X, permutation_matrix
     else:  # Column permutation
         return X @ permutation_matrix.T, permutation_matrix.T
 
 # clustering rows of X matrix
-def correlation_clustering(X, k, len_of_run):
-    correlation_matrix = np.corrcoef(X)
+def cosine_clustering(X, k, len_of_run):
+    cosine_matrix = cdist(X, X, metric='cosine')
+    cosine_matrix = abs(1 - cosine_matrix)
 
     n = X.shape[0]
     if n % k != 0:
@@ -31,7 +33,7 @@ def correlation_clustering(X, k, len_of_run):
 
     # number of clusters
     # k = int(np.sqrt(n))
-    m = Model(sense=maximize)
+    m = Model(sense=MAXIMIZE)
 
     x = [[m.add_var(var_type=BINARY) for j in range(k)] for i in range(n)]
 
@@ -53,7 +55,7 @@ def correlation_clustering(X, k, len_of_run):
                 m += z[i][i2][j] <= x[i2][j]
                 m += z[i][i2][j] >= x[i][j] + x[i2][j] - 1
 
-    obj = xsum(correlation_matrix[i][i2] * z[i][i2][j]
+    obj = xsum(cosine_matrix[i][i2] * z[i][i2][j]
                for j in range(k) for i in range(n) for i2 in range(i + 1, n))
 
     m.objective = obj
@@ -71,31 +73,70 @@ def correlation_clustering(X, k, len_of_run):
     return clusters
 
 def compute_clustering_permutation_matrices(X, k, len_of_run):
-    row_clusters = correlation_clustering(X.T, k, len_of_run)
+    row_clusters = cosine_clustering(X.T, k, len_of_run)
     X, P_rows = permute_matrix_with_clusters(X, row_clusters, 0)
-    column_clusters = correlation_clustering(X, k, len_of_run)
+    column_clusters = cosine_clustering(X, k, len_of_run)
     X, P_columns = permute_columns_based_on_clusters(X, column_clusters, 1)
 
-    return P_rows, P_columns
+    return P_rows, P_columns, X
+
+def compute_row_permutation(X, k, len_of_run):
+    row_clusters = cosine_clustering(X.T, k, len_of_run)
+    X, P_rows = permute_matrix_with_clusters(X, row_clusters, 0)
+
+    return X, P_rows
+def compute_column_permutation(X, k, len_of_run):
+    column_clusters = cosine_clustering(X, k, len_of_run)
+    X, P_columns = permute_columns_based_on_clusters(X, column_clusters, 1)
+
+    return X, P_columns
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python3 correlation_mip.py <input_file_path>")
+        print("Usage: python3 cosine_dist_mip.py <input_file_path>")
     else:
         input_path = sys.argv[1]
-        print("correlation_mip.py")
+        print("cosine_dist_mip.py")
         print(input_path)
 
-        X = torch.load(input_path)
-        len_of_run = 4000 # in seconds
-        #gap_of_run = 10
+        # X = torch.tensor([
+        #     [10, 20, 30, 40, 50, 60, 70, 80, 90],  # Outlier
+        #     [1, 1, 1, 1, 1, 1, 1, 1, 1],  # Cluster 4 (identical to row 7)
+        #     [1, 2, 3, 4, 5, 6, 7, 8, 9],  # Cluster 1
+        #     [1, 2, 3, 4, 5, 6, 7, 8, 9],  # Cluster 1 (identical to row 1)
+        #     [2, 4, 6, 8, 10, 12, 14, 16, 18],  # Cluster 2
+        #     [2, 4, 6, 8, 10, 12, 14, 16, 18],  # Cluster 2 (identical to row 3)
+        #     [3, 6, 9, 12, 15, 18, 21, 24, 27],  # Cluster 3
+        #     [3, 6, 9, 12, 15, 18, 21, 24, 27],  # Cluster 3 (identical to row 5)
+        #     [1, 1, 1, 1, 1, 1, 1, 1, 1],  # Cluster 4 (constant row)
+        # ])
+        # k = int(np.sqrt(X.shape[0]))
+        # len_of_run = 100 # in seconds
+        #
+        #
+        # #X = torch.load(input_path)
+        # len_of_run = 100 # in seconds
+        # #gap_of_run = 10
+        #
+        # k = int(np.sqrt(X.shape[0]))
+        # S, P_rows = compute_row_permutation(X, k, len_of_run)
+        # M = P_rows @ X
+        # print(M)
 
+        X = torch.load(input_path)
+        print(X.size())
+        len_of_run = 1000 # in seconds
         k = int(np.sqrt(X.shape[0]))
 
-        row_clusters = correlation_clustering(X.T, k, len_of_run)
+        row_clusters = cosine_clustering(X.T, k, len_of_run)
         X = permute_rows_based_on_clusters(X, row_clusters)
-        column_clusters = correlation_clustering(X, k, len_of_run)
+        print(row_clusters)
+        print(X.size())
+
+        column_clusters = cosine_clustering(X, k, len_of_run)
         X = permute_columns_based_on_clusters(X, column_clusters)
+        print(column_clusters)
+        print(X.size())
 
         # saving clustered matrix
         script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -103,7 +144,7 @@ if __name__ == "__main__":
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         file_name = os.path.splitext(os.path.basename(input_path))[0]
-        save_name = f"{file_name}_{len_of_run}.pt"
+        save_name = f"{file_name}_{len_of_run}_deleteMe.pt"
 
         save_path = os.path.join(output_dir, save_name)
         torch.save(X, save_path)
