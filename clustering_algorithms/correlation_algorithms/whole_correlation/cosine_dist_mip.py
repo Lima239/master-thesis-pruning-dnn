@@ -23,6 +23,7 @@ def permute_matrix_with_clusters(X, clusters, axis=0):
         return X @ permutation_matrix.T, permutation_matrix.T
 
 # clustering rows of X matrix
+# k ---> number of clusters
 def cosine_clustering(X, k, len_of_run):
     cosine_matrix = cdist(X, X, metric='cosine')
     cosine_matrix = abs(1 - cosine_matrix)
@@ -45,7 +46,7 @@ def cosine_clustering(X, k, len_of_run):
 
     # each cluster has k rows
     for j in range(k):
-        m += xsum(x[i][j] for i in range(n)) == k
+        m += xsum(x[i][j] for i in range(n)) == n/k
 
     # z[i][i2][j] = x[i][j] * x[i2][j]
     for i in range(n):
