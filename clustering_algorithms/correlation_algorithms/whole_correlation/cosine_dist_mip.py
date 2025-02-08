@@ -33,7 +33,6 @@ def cosine_clustering(X, k, len_of_run):
         raise ValueError(f"Invalid number of clusters: {k}.")
 
     # number of clusters
-    # k = int(np.sqrt(n))
     m = Model(sense=MAXIMIZE, solver_name=GRB)
 
     x = [[m.add_var(var_type=BINARY) for j in range(k)] for i in range(n)]
@@ -71,15 +70,14 @@ def cosine_clustering(X, k, len_of_run):
             if x[i][j].x == 1:
                 clusters[j].append(i)
 
-    return clusters
+    print(clusters)
+    return torch.tensor(clusters).flatten()
 
-def compute_clustering_permutation_matrices(X, k_rows, l_columns, len_of_run):
-    row_clusters = cosine_clustering(X.T, k_rows, len_of_run)
-    X, P_rows = permute_matrix_with_clusters(X, row_clusters, 0)
-    column_clusters = cosine_clustering(X, l_columns, len_of_run)
-    X, P_columns = permute_matrix_with_clusters(X, column_clusters, 1)
+def compute_clustering_permutations(X, k_rows, l_columns, len_of_run):
+    row_clusters_perm = cosine_clustering(X, k_rows, len_of_run)
+    column_clusters_perm = cosine_clustering(X.T, l_columns, len_of_run)
 
-    return P_rows, P_columns, X
+    return row_clusters_perm, column_clusters_perm
 
 def compute_row_permutation(X, k, len_of_run):
     row_clusters = cosine_clustering(X.T, k, len_of_run)
@@ -107,10 +105,26 @@ if __name__ == "__main__":
         #     [1, 2, 3, 4, 5, 6, 7, 8, 9],  # Cluster 1 (identical to row 1)
         #     [2, 4, 6, 8, 10, 12, 14, 16, 18],  # Cluster 2
         #     [2, 4, 6, 8, 10, 12, 14, 16, 18],  # Cluster 2 (identical to row 3)
-        #     [3, 6, 9, 12, 15, 18, 21, 24, 27],  # Cluster 3
-        #     [3, 6, 9, 12, 15, 18, 21, 24, 27],  # Cluster 3 (identical to row 5)
-        #     [1, 1, 1, 1, 1, 1, 1, 1, 1],  # Cluster 4 (constant row)
+        #     # [3, 6, 9, 12, 15, 18, 21, 24, 27],  # Cluster 3
+        #     # [3, 6, 9, 12, 15, 18, 21, 24, 27],  # Cluster 3 (identical to row 5)
+        #     # [1, 1, 1, 1, 1, 1, 1, 1, 1],  # Cluster 4 (constant row)
         # ])
+        #
+        #
+        #
+        # k = int(np.sqrt(X.shape[0]))
+        # P_rows, P_columns = compute_clustering_permutations(X, 3, 3, 30)
+        # print(P_rows)
+        # print(P_columns)
+        #
+        # print(X)
+        # #X = X[P_rows, :]
+        # X = X.index_select(-2, P_rows)
+        # print(X)
+        # #X = X.T[P_columns,:].T
+        # X = X.index_select(-1, P_columns)
+        # print(X)
+
         # k = int(np.sqrt(X.shape[0]))
         # len_of_run = 100 # in seconds
         #
@@ -129,15 +143,9 @@ if __name__ == "__main__":
         len_of_run = 100 # in seconds
         k = int(np.sqrt(X.shape[0]))
 
-        row_clusters = cosine_clustering(X.T, k, len_of_run)
-        X = permute_rows_based_on_clusters(X, row_clusters)
-        print(row_clusters)
-        print(X.size())
-
-        column_clusters = cosine_clustering(X, k, len_of_run)
-        X = permute_columns_based_on_clusters(X, column_clusters)
-        print(column_clusters)
-        print(X.size())
+        P_rows, P_columns = compute_clustering_permutations(X, k, k, len_of_run)
+        X = X.index_select(-2, P_rows)
+        X = X.index_select(-1, P_columns)
 
         # saving clustered matrix
         script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -145,7 +153,19 @@ if __name__ == "__main__":
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         file_name = os.path.splitext(os.path.basename(input_path))[0]
-        save_name = f"{file_name}_{len_of_run}_deleteMe.pt"
+        save_name = f"{file_name}_{len_of_run}.pt"
 
         save_path = os.path.join(output_dir, save_name)
         torch.save(X, save_path)
+
+
+
+        # row_clusters = cosine_clustering(X.T, k, len_of_run)
+        # X = permute_rows_based_on_clusters(X, row_clusters)
+        # print(row_clusters)
+        # print(X.size())
+        #
+        # column_clusters = cosine_clustering(X, k, len_of_run)
+        # X = permute_columns_based_on_clusters(X, column_clusters)
+        # print(column_clusters)
+        # print(X.size())
