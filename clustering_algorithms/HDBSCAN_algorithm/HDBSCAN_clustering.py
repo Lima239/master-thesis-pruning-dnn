@@ -38,22 +38,23 @@ def compute_clustering_permutations_HDBSCAN(X, k_rows, l_columns, len_of_run):
 
 if __name__ == "__main__":
     # if len(sys.argv) < 2:
-    #     print("Usage: python3 cosine_dist_mip.py <input_file_path>")
+    #      print("Usage: python3 cosine_dist_mip.py <input_file_path>")
     # else:
     input_path = "/Users/KlaudiaLichmanova/Desktop/school5/Diplomovka/codebase/master/master-thesis-pruning-dnn/inputs/real_weights/pytorch_weights_36x36_1.pt"
     X = torch.load(input_path)
+    #
+    # k = int(np.sqrt(X.shape[0]))
+    # X, row_clusters = hdbscan_clustering(X, k)
+    #
+    # X, column_clusters = hdbscan_clustering(X.T, k)
+    #
+    # script_dir = os.path.dirname(os.path.abspath(__file__))
+    # output_dir = os.path.join(script_dir, "output")
+    # if not os.path.exists(output_dir):
+    #     os.makedirs(output_dir)
+    # file_name = os.path.splitext(os.path.basename(input_path))[0]
+    # save_name = f"{file_name}_cosine_abs_spectral.pt"
+    #
+    # save_path = os.path.join(output_dir, save_name)
+    # torch.save(X, save_path)
 
-    k = int(np.sqrt(X.shape[0]))
-    X, row_clusters = hdbscan_clustering(X, k)
-
-    X, column_clusters = hdbscan_clustering(X.T, k)
-
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    output_dir = os.path.join(script_dir, "output")
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    file_name = os.path.splitext(os.path.basename(input_path))[0]
-    save_name = f"{file_name}_cosine_abs_spectral.pt"
-
-    save_path = os.path.join(output_dir, save_name)
-    torch.save(X, save_path)
