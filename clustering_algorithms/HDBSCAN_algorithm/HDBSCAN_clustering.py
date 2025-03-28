@@ -6,8 +6,8 @@ from sklearn.cluster import SpectralClustering
 import hdbscan
 
 def cluster_with_hdbscan_high_accuracy(X):
-    X_np = X.detach().cpu().numpy()
-    cosine_dist = cosine_distances(X_np)
+    X_np = X.detach().cpu().numpy().astype(np.float64)
+    cosine_dist = cosine_distances(X_np).astype(np.float64)
 
     clusterer = hdbscan.HDBSCAN(
         metric='precomputed',
