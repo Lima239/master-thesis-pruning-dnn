@@ -4,8 +4,9 @@ import os
 from sklearn.metrics.pairwise import cosine_distances
 from sklearn.cluster import SpectralClustering
 import hdbscan
+from collections import defaultdict
 
-def cluster_with_hdbscan_high_accuracy(X):
+def cluster_with_hdbscan_high_accuracy(X, k):
     X_np = X.detach().cpu().numpy().astype(np.float64)
     cosine_dist = cosine_distances(X_np).astype(np.float64)
 
@@ -20,19 +21,36 @@ def cluster_with_hdbscan_high_accuracy(X):
     )
     labels = clusterer.fit_predict(cosine_dist)
 
-    unique_labels = sorted(set(labels) - {-1})
-    clusters = [[] for _ in unique_labels]
-    label_to_index = {label: i for i, label in enumerate(unique_labels)}
+    labels = clusterer.fit_predict(cosine_dist)
 
+    # Group indices by cluster label
+    raw_clusters = defaultdict(list)
     for idx, lbl in enumerate(labels):
         if lbl != -1:
-            clusters[label_to_index[lbl]].append(idx)
+            raw_clusters[lbl].append(idx)
 
-    return torch.tensor([i for group in clusters for i in group], dtype=torch.long)
+    # Flatten and sort all clustered points by cluster group
+    sorted_indices = [i for cluster in raw_clusters.values() for i in cluster]
 
-def compute_clustering_permutations_HDBSCAN(X):
-    row_clusters_perm = cluster_with_hdbscan_high_accuracy(X)
-    column_clusters_perm = cluster_with_hdbscan_high_accuracy(X.T)
+    # Fill in missing points (e.g., noise) using remaining unassigned indices
+    all_indices = set(range(X.shape[0]))
+    unassigned = list(all_indices - set(sorted_indices))
+    sorted_indices.extend(unassigned)
+
+    # Now split sorted_indices into k equal parts
+    n = X.shape[0]
+    if n % k != 0:
+        raise ValueError(f"Invalid number of clusters: {k}. Cannot evenly divide {n} samples.")
+
+    cluster_size = n // k
+    clusters = [sorted_indices[i*cluster_size:(i+1)*cluster_size] for i in range(k)]
+
+    print(clusters)
+    return torch.tensor(clusters).flatten()
+
+def compute_clustering_permutations_HDBSCAN(X, k):
+    row_clusters_perm = cluster_with_hdbscan_high_accuracy(X, k)
+    column_clusters_perm = cluster_with_hdbscan_high_accuracy(X.T, k)
 
     return row_clusters_perm, column_clusters_perm
 
