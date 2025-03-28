@@ -30,9 +30,9 @@ def cluster_with_hdbscan_high_accuracy(X):
 
     return torch.tensor([i for group in clusters for i in group], dtype=torch.long)
 
-def compute_clustering_permutations_HDBSCAN(X, k_rows, l_columns, len_of_run):
-    row_clusters_perm = cluster_with_hdbscan_high_accuracy(X, k_rows, len_of_run)
-    column_clusters_perm = cluster_with_hdbscan_high_accuracy(X.T, l_columns, len_of_run)
+def compute_clustering_permutations_HDBSCAN(X):
+    row_clusters_perm = cluster_with_hdbscan_high_accuracy(X)
+    column_clusters_perm = cluster_with_hdbscan_high_accuracy(X.T)
 
     return row_clusters_perm, column_clusters_perm
 
