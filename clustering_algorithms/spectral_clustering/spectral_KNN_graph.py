@@ -64,7 +64,7 @@ def cluster_with_spectral_KNN(X, k):
     return torch.tensor(clusters).flatten()
 
 
-def compute_clustering_permutations_SPECTRAL_KNN(X: torch.Tensor, k1: int, k2: int):
+def compute_clustering_permutations_SPECTRAL_KNN(X, k1, k2):
     row_clusters_perm = cluster_with_spectral_KNN(X, k1)
     column_clusters_perm = cluster_with_spectral_KNN(X.T, k2)
     return row_clusters_perm, column_clusters_perm
