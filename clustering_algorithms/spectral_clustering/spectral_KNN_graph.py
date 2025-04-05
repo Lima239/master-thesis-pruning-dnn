@@ -10,7 +10,7 @@ from sklearn.preprocessing import normalize
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 
-def build_mutual_knn_graph(X_np, n_neighbors=10):
+def build_mutual_knn_graph(X_np, n_neighbors):
     sim_matrix = cosine_similarity(X_np)
     n = X_np.shape[0]
     knn_mask = np.zeros_like(sim_matrix, dtype=bool)
@@ -34,7 +34,7 @@ def cluster_with_spectral_KNN(X, k):
     n = X.shape[0]
     cluster_size = n // k
 
-    affinity = build_mutual_knn_graph(X_np, n_neighbors=10)
+    affinity = build_mutual_knn_graph(X_np, 2 * cluster_size)
 
     spectral = SpectralClustering(
         n_clusters=k,
