@@ -34,7 +34,7 @@ def cluster_with_spectral_KNN(X, k):
     n = X.shape[0]
     cluster_size = n // k
 
-    affinity = build_mutual_knn_graph(X_np, 2 * cluster_size)
+    affinity = build_mutual_knn_graph(X_np, cluster_size)
 
     spectral = SpectralClustering(
         n_clusters=k,
