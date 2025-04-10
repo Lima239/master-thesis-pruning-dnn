@@ -2,7 +2,7 @@ from scipy.spatial.distance import cdist
 import numpy as np
 import torch
 
-def greedy_cosine_clusters(X, k, refine_iters=50):
+def greedy_cosine_clusters(X, k, refine_iters):
     X_np = X.detach().cpu().numpy()
     n = X_np.shape[0]
     assert n % k == 0, "n must be divisible by k"
