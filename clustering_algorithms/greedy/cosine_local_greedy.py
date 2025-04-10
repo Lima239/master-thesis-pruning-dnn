@@ -53,7 +53,7 @@ def greedy_cosine_clusters(X, k, refine_iters=50):
     perm = [i for cluster in clusters for i in cluster]
     return torch.tensor(perm)
 
-def compute_clustering_permutations_COS_GREEDY_LOCAL(X, k1, k2):
-    row_perm = greedy_cosine_clusters(X, k1)
-    col_perm = greedy_cosine_clusters(X.T, k2)
+def compute_clustering_permutations_COS_GREEDY_LOCAL(X, k1, k2, refine_iters):
+    row_perm = greedy_cosine_clusters(X, k1, refine_iters)
+    col_perm = greedy_cosine_clusters(X.T, k2, refine_iters)
     return row_perm, col_perm
