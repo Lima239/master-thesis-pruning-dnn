@@ -95,13 +95,13 @@ def simulated_annealing_balanced_clustering(X, k, steps=3000, T_start=2.0, T_end
     return torch.tensor([i for cluster in best_clusters for i in cluster], dtype=torch.long)
 
 
-def compute_clustering_permutations_ANNEAL_PRO(X, k1, k2, steps=5000, n_retries=5):
+def compute_clustering_permutations_ANNEAL_PRO(X, Y, k1, k2, steps=5000, n_retries=5):
     best_score = float("-inf")
     best_row_perm, best_col_perm = None, None
 
     for run in range(n_retries):
         row_perm = simulated_annealing_balanced_clustering(X, k1, steps=steps)
-        col_perm = simulated_annealing_balanced_clustering(X.T, k2, steps=steps)
+        col_perm = simulated_annealing_balanced_clustering(Y.T, k2, steps=steps)
 
         # Score the result
         sim = cosine_similarity_matrix(X)
