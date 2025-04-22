@@ -10,12 +10,12 @@ from sklearn.preprocessing import normalize
 from scipy.spatial.distance import cdist
 import numpy as np
 
-def build_mutual_knn_graph(X_np, n_neighbors):
+def build_mutual_knn_graph(X, n_neighbors):
     cosine_matrix = cdist(X, X, metric='cosine')
     cosine_matrix = abs(1 - cosine_matrix)
     np.fill_diagonal(cosine_matrix, 0)
 
-    n = X_np.shape[0]
+    n = X.shape[0]
     knn_mask = np.zeros_like(cosine_matrix, dtype=bool)
     for i in range(n):
         top_k = np.argsort(cosine_matrix[i])[-n_neighbors:]
@@ -35,7 +35,7 @@ def balance_clusters(X, labels, k, cluster_size):
     clusters_dict = defaultdict(list)
     for idx, label in enumerate(labels):
         clusters_dict[label].append(idx)
-
+    #print(clusters_dict)
     cluster_selections = [[] for _ in range(k)]  # will store final cluster indices
     used_indices = set()
 
@@ -67,17 +67,17 @@ def balance_clusters(X, labels, k, cluster_size):
             print(f"Cluster {c} filled with: {fill}")
 
         assert len(cluster_selections[c]) == cluster_size, f"Cluster {c} still underfilled"
-
+    #print("hello")
     balanced_indices = [i for cluster in cluster_selections for i in cluster]
     return balanced_indices
 
 def cluster_with_balanced_spectral_KNN(X, k):
-    X_np = X.detach().cpu().numpy()
+    X = X.detach().cpu().numpy()
     #X_norm = normalize(X_np, norm='l2')
     n = X.shape[0]
     cluster_size = n // k
 
-    affinity = build_mutual_knn_graph(X_np, 2 * cluster_size)
+    affinity = build_mutual_knn_graph(X, 2 * cluster_size)
 
     spectral = SpectralClustering(
         n_clusters=k,
@@ -87,7 +87,7 @@ def cluster_with_balanced_spectral_KNN(X, k):
     )
     labels = spectral.fit_predict(affinity)
 
-    balanced_indices = balance_clusters(X_np, labels, k, cluster_size)
+    balanced_indices = balance_clusters(X, labels, k, cluster_size)
 
     return torch.tensor(balanced_indices)
 
