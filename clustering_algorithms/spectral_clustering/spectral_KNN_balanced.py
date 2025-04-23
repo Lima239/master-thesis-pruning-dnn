@@ -29,20 +29,30 @@ def build_mutual_knn_graph(X, n_neighbors):
 
 # filling underfull clusters after collecting all initial selections
 def balance_clusters(X, labels, k, cluster_size):
+    """
+    Build k balanced clusters of size `cluster_size` using cosine similarity.
+    Underfilled clusters are filled by picking unused points that are closest to their centers.
+    """
+
     n = X.shape[0]
     all_indices = set(range(n))
 
+    # Step 1: Cluster dict from labels
     clusters_dict = defaultdict(list)
     for idx, label in enumerate(labels):
         clusters_dict[label].append(idx)
-    #print(clusters_dict)
-    cluster_selections = [[] for _ in range(k)]  # will store final cluster indices
+
+    # Store results
+    cluster_selections = [[] for _ in range(k)]
+    cluster_centers = [None] * k
     used_indices = set()
 
+    # Step 2: Pick top similarity per cluster
     for c in range(k):
         indices = clusters_dict[c]
         cluster_points = X[indices]
         center = cluster_points.mean(axis=0, keepdims=True)
+        cluster_centers[c] = center
 
         cosine_dist = cdist(cluster_points, center, metric="cosine")
         cosine_sim = np.abs(1 - cosine_dist).flatten()
@@ -54,20 +64,34 @@ def balance_clusters(X, labels, k, cluster_size):
         cluster_selections[c].extend(selected)
         used_indices.update(selected)
 
+    # Step 3: Fill underfull clusters with closest unused points
     unused_indices = list(all_indices - used_indices)
-    unused_ptr = 0
+    unused_points = X[unused_indices]
 
     for c in range(k):
-        current_len = len(cluster_selections[c])
-        if current_len < cluster_size:
-            needed = cluster_size - current_len
-            fill = unused_indices[unused_ptr:unused_ptr + needed]
-            cluster_selections[c].extend(fill)
-            unused_ptr += needed
-            print(f"Cluster {c} filled with: {fill}")
+        need = cluster_size - len(cluster_selections[c])
+        if need > 0:
+            center = cluster_centers[c]
+            print("center", center)
+            dist = cdist(unused_points, center, metric="cosine")
+            sim = np.abs(1 - dist).flatten()
 
-        assert len(cluster_selections[c]) == cluster_size, f"Cluster {c} still underfilled"
-    #print("hello")
+            best_indices = np.argsort(sim)[-need:]  # take most similar
+            chosen = [unused_indices[i] for i in best_indices]
+
+            cluster_selections[c].extend(chosen)
+            used_indices.update(chosen)
+
+            # Remove used from the pool
+            for idx in sorted(best_indices, reverse=True):
+                del unused_indices[idx]
+                unused_points = np.delete(unused_points, idx, axis=0)
+
+            print(f"Cluster {c} filled with closest: {chosen}")
+
+        assert len(cluster_selections[c]) == cluster_size, f"Cluster {c} still underfilled!"
+
+    # Final flat list of all clusters
     balanced_indices = [i for cluster in cluster_selections for i in cluster]
     return balanced_indices
 
@@ -103,18 +127,25 @@ if __name__ == "__main__":
     # rows, cols = compute_clustering_permutations_SPECTRAL(X, k=4)
     # print("Row permutation:", rows)
     # print("Column permutation:", cols)
-    X = torch.tensor([
-        [10, 20, 30, 40, 50, 60, 70, 80, 90],  # Outlier
-        [1, 1, 1, 1, 1, 1, 1, 1, 1],  # Cluster 4 (identical to row 7)
-        [1, 2, 3, 4, 5, 6, 7, 8, 9],  # Cluster 1
-        [1, 2, 3, 4, 5, 6, 7, 8, 9],  # Cluster 1 (identical to row 1)
-        [2, 4, 6, 8, 10, 12, 14, 16, 18],  # Cluster 2
-        [2, 4, 6, 8, 10, 12, 14, 16, 18],  # Cluster 2 (identical to row 3)
-        [3, 6, 9, 12, 15, 18, 21, 24, 27],  # Cluster 3
-        [3, 6, 9, 12, 15, 18, 21, 24, 27],  # Cluster 3 (identical to row 5)
-        [1, 1, 1, 1, 1, 1, 1, 1, 1],  # Cluster 4 (constant row)
-    ])
+    # X = torch.tensor([
+    #     [10, 20, 30, 40, 50, 60, 70, 80, 90],  # Outlier
+    #     [1, 1, 1, 1, 1, 1, 1, 1, 1],  # Cluster 4 (identical to row 7)
+    #     [1, 2, 3, 4, 5, 6, 7, 8, 9],  # Cluster 1
+    #     [1, 2, 3, 4, 5, 6, 7, 8, 9],  # Cluster 1 (identical to row 1)
+    #     [2, 4, 6, 8, 10, 12, 14, 16, 18],  # Cluster 2
+    #     [2, 4, 6, 8, 10, 12, 14, 16, 18],  # Cluster 2 (identical to row 3)
+    #     [3, 6, 9, 12, 15, 18, 21, 24, 27],  # Cluster 3
+    #     [3, 6, 9, 12, 15, 18, 21, 24, 27],  # Cluster 3 (identical to row 5)
+    #     [1, 1, 1, 1, 1, 1, 1, 1, 1],  # Cluster 4 (constant row)
+    # ])
+    #
+    # row_clusters_perm, column_clusters_perm = compute_clustering_permutations_SPECTRAL_KNN_balanced(X, 3, 3)
+    # print(row_clusters_perm)
+    # print(column_clusters_perm)
+    X = torch.load("/Users/KlaudiaLichmanova/Desktop/school5/Diplomovka/codebase/master/master-thesis-pruning-dnn/substitution_into_model/fc1.pt")
+    print(X.shape)
 
-    row_clusters_perm, column_clusters_perm = compute_clustering_permutations_SPECTRAL_KNN_balanced(X, 3, 3)
-    print(row_clusters_perm)
-    print(column_clusters_perm)
+    P_rows, P_columns = compute_clustering_permutations_SPECTRAL_KNN_balanced(X, 4, 4)
+    X = X[P_rows, :]
+    X = X[:, P_columns]
+    torch.save(X,"/Users/KlaudiaLichmanova/Desktop/school5/Diplomovka/codebase/master/master-thesis-pruning-dnn/inputs/metrics/fc1_KNN2.pt")
