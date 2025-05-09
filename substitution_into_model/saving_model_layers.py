@@ -19,7 +19,7 @@ def capture_matrice(module,name):
 for n, m in model.named_modules():
     for n2, m2 in m.named_modules():
         if "." not in n2 and select_all_linear(n, n2, m2) and len(n2) > 0:
-            #capture_matrice(m2, n2)
+            capture_matrice(m2, n2)
             print(n2)
             print(m2.weight.data.shape)
 
