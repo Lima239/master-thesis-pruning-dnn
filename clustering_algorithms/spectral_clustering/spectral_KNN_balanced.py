@@ -129,7 +129,7 @@ if __name__ == "__main__":
     # row_clusters_perm, column_clusters_perm = compute_clustering_permutations_SPECTRAL_KNN_balanced(X, 3, 3)
     # print(row_clusters_perm)
     # print(column_clusters_perm)
-    X = torch.load("/Users/KlaudiaLichmanova/Desktop/school5/Diplomovka/codebase/master/master-thesis-pruning-dnn/substitution_into_model/fc1.pt")
+    X = torch.load("/inputs/fc1.pt")
     print(X.shape)
 
     P_rows, P_columns = compute_clustering_permutations_SPECTRAL_KNN_balanced(X, 4, 4)

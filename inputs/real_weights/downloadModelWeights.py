@@ -1,7 +1,7 @@
 import torch
 
 def generate_and_save_tensor(file_path):
-    data = torch.load("../../substitution_into_model/fc1.pt")
+    data = torch.load("../fc1.pt")
     #matrix = data["decoder.layers.1.self_attn.v_proj.weight"]
 
     matrix = data[:96, :96]

@@ -1,119 +1,57 @@
 import torch
+import torch.nn as nn
 
-"""    
-This function projects input matrix onto two block diagonal matrices L and R using SVD.
-"""
-def project_on_monarch_matrices(M):
-  n = M.size(0)
-  m = int(n ** 0.5)
+def permute(nb, size, L):
+    out = []
+    perm_base = torch.arange(size)
+    parts = perm_base.chunk(nb*nb)
+    for i in range(nb):
+      out += parts[i::nb]
 
-  print(M.size())  # or M.shape
-  print(M.numel())
-  assert m * m == n, "n must be a perfect square"
+    orig_shape = L.shape
+    L = L.flatten(0, -2)
 
-  # ensure the input is in float32 if it's in half precision
-  # if B.dtype == torch.float16:
-  #     B = B.float()
+    out = L.T[torch.cat(out)].T
+    return out.reshape(orig_shape)
 
-  # reshape B into a 4D tensor A
-  A = M.view(m, m, m, m).permute(0, 2, 1, 3)
+def monarch_decomposition(W, n_blocks=4, rank=None):
+    s0, s1 = W.shape[0] // n_blocks, W.shape[1] // n_blocks
 
-  L_blocks = []
-  R_blocks = []
+    if rank is None:
+        bs = W.shape[0] // n_blocks, W.shape[1] // n_blocks
+        rank = int((bs[0] * bs[1]) / (bs[0] + bs[1]) / 2)  # around 50%
 
-  #for i in range(m):
-  for j in range(m):
-    columns_U = []
-    rows_VT = []
-    # for j in range(m):
-    #   M_jk = M[i*m:i*m+m, j*m:j*m+m]  # size m x m
-    for k in range(m):
-      M_jk = A[:, j, k, :]  # size m x m
+    print("rank ", rank)
+    mid = rank * n_blocks
 
-      # SVD of M_jk
-      U, S, VT = torch.linalg.svd(torch.tensor(M_jk).float(), full_matrices=False)
-      # get the first column of U
-      u_jk = U[:, 0]
-      # first row of V^T
-      v_jk = VT[0, :]
+    L = nn.Parameter(torch.zeros((n_blocks, W.shape[1]//n_blocks, mid), device=W.device))
+    R = nn.Parameter(torch.zeros((n_blocks, mid, W.shape[0]//n_blocks), device=W.device))
 
-      columns_U.append(u_jk * S[0])
-      rows_VT.append(v_jk.unsqueeze(0))
+    for i in range(n_blocks):
+        for j in range(n_blocks):
+            part = W[i*s0:i*s0+s0, j*s1:j*s1+s1]
 
-    L_blocks.append(torch.stack(columns_U, dim=1).T)
-    R_blocks.append(torch.cat(rows_VT, dim=0))
+            U, s, Vh = torch.linalg.svd(part, full_matrices=False)
+            s = s[:rank]
+            U = U[:, :rank] * s.sqrt()
+            Vh = Vh[:rank] * s.sqrt().unsqueeze(1)
 
-  # convert block lists into block-diagonal matrices
-  L = torch.block_diag(*L_blocks)
-  R = torch.block_diag(*R_blocks)
-
-  return L, R
-
-"""
-Creates permutation matrix. The matrix P reorders the rows and columns of the input block-diagonal matrix that blocks 
-along the diagonal are shifted to form a new matrix where blocks are arranged row-wise across the matrix
-"""
-def monarch_permutation_matrix(m):
-  m = int(m)
-  n = m * m
-
-  P = torch.zeros((n, n), dtype=torch.float32)
-
-  for i in range(n):
-    P[i, (i % m) * m + i // m] = 1
-
-  # torch.set_printoptions(sci_mode=False, edgeitems=100, linewidth=200, threshold=10000)
-  #
-  # print("transpose")
-
-  #print("P matrix", P)
-  #B = torch.transpose(P, 0, 1)
-  #print("P.T matrix", B)
-  #assert P == torch.transpose(P, 0, 1)
-
-  return P
+            L.data[j, :, rank*i:rank*i+rank] = (Vh).T
+            R.data[i, rank*j:rank*j+rank] = U.T
 
 
-"""
-Returns the reconstructed Monarch matrix, calculated as M = PLP^T R.
-"""
-def reconstruct_monarch_matrix(L, R, m):
-  m = int(m)
+    L = [L[i] for i in range(L.shape[0])]
+    L = torch.block_diag(*L)
 
-  P = monarch_permutation_matrix(m)
-  # print("L ---chch")
-  # print(L)
-  PL = torch.matmul(P, L)
-  # print("PL ---chch")
-  # print(PL)
-  # PLPT  = torch.matmul(PL,torch.transpose(P, 0, 1))
-  # print("PLPT ---chch")
-  # print(PLPT)
-  # PLPTR  = torch.matmul(PLPT,R)
-  # print("PLPTR ---chch")
-  # print(PLPTR)
-  PTR = torch.matmul(torch.transpose(P, 0, 1), R)
-  print("PL",PL)
+    R = [R[i] for i in range(R.shape[0])]
+    R = torch.block_diag(*R)
 
-  print("PTR",PTR)
-  M = torch.matmul(PL, PTR)
-  print("Second ---chch")
-  print(M)
-  return M
+    L = permute(n_blocks, mid*n_blocks, L)
+    W_approx = L @ R
 
-"""
-This function converts a block-structured matrix back into its original matrix form.
-"""
-def block_matrix_to_original(block_matrix):
-  n = block_matrix.shape[0]
-  block_size = int(n ** 0.5)
-  original = torch.zeros((n, n))
+    return W_approx.T
 
-  for i in range(n):
-    for j in range(n):
-      block_row = (i // block_size) * block_size + (j // block_size * block_size) // block_size
-      block_col = (i % block_size) * block_size + j % block_size
-
-      original[i][j] = block_matrix[block_row][block_col]
-
-  return original
+def compute_reconstruction_error(W: torch.Tensor, W_approx: torch.Tensor):
+  error = torch.norm(W - W_approx, p='fro') ** 2
+  base = torch.norm(W, p='fro') ** 2
+  return (error / base).item()

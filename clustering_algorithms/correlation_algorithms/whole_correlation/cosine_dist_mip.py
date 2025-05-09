@@ -96,7 +96,7 @@ if __name__ == "__main__":
     # else:
     #     input_path = sys.argv[1]
         print("cosine_dist_mip.py")
-        input_path = "/Users/KlaudiaLichmanova/Desktop/school5/Diplomovka/codebase/master/master-thesis-pruning-dnn/substitution_into_model/fc1.pt"
+        input_path = "/inputs/fc1.pt"
         print(input_path)
 
         X = torch.load(input_path)
