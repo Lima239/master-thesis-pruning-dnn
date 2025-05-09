@@ -16,10 +16,10 @@ def permute_columns_based_on_clusters(M, clusters):
 def block_cosine_dist_clustering(X, k, len_of_run):
     submatrices = [X[:, i * k:(i + 1) * k] for i in range(k)]
 
-    # Compute cosine similarity matrix for each submatrix
+    # cosine similarity matrix for each submatrix
     cosine_matrices = [abs(1 - cdist(submatrix, submatrix, metric='cosine')) for submatrix in submatrices]
 
-    # Compute the average cosine similarity matrix across all blocks
+    # compute the average cosine similarity matrix across all blocks
     average_cosine_matrix = sum(cosine_matrices) / len(cosine_matrices)
 
     n = X.shape[0]
@@ -89,14 +89,13 @@ if __name__ == "__main__":
         X = X[P_rows,:]
         X = X[:,P_columns]
 
-
         # saving clustered matrix
         script_dir = os.path.dirname(os.path.abspath(__file__))
         output_dir = os.path.join(script_dir, "output")
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         file_name = os.path.splitext(os.path.basename(input_path))[0]
-        save_name = f"{file_name}_{len_of_run}_hello.pt"
+        save_name = f"{file_name}_{len_of_run}.pt"
 
         save_path = os.path.join(output_dir, save_name)
         torch.save(X, save_path)

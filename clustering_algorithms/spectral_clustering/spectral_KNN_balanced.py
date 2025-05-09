@@ -1,12 +1,7 @@
 import torch
 import numpy as np
 from sklearn.cluster import SpectralClustering
-from scipy.spatial.distance import cdist
 from collections import defaultdict
-import torch.nn.functional as F
-from sklearn.decomposition import PCA
-from sklearn.neighbors import kneighbors_graph
-from sklearn.preprocessing import normalize
 from scipy.spatial.distance import cdist
 import numpy as np
 
@@ -27,27 +22,22 @@ def build_mutual_knn_graph(X, n_neighbors):
     np.fill_diagonal(affinity, 0)
     return affinity
 
-# filling underfull clusters after collecting all initial selections
+"""
+Build k balanced clusters of size `cluster_size` using cosine similarity.
+Underfilled clusters are filled by picking unused points that are closest to their centers.
+"""
 def balance_clusters(X, labels, k, cluster_size):
-    """
-    Build k balanced clusters of size `cluster_size` using cosine similarity.
-    Underfilled clusters are filled by picking unused points that are closest to their centers.
-    """
-
     n = X.shape[0]
     all_indices = set(range(n))
 
-    # Step 1: Cluster dict from labels
     clusters_dict = defaultdict(list)
     for idx, label in enumerate(labels):
         clusters_dict[label].append(idx)
 
-    # Store results
     cluster_selections = [[] for _ in range(k)]
     cluster_centers = [None] * k
     used_indices = set()
 
-    # Step 2: Pick top similarity per cluster
     for c in range(k):
         indices = clusters_dict[c]
         cluster_points = X[indices]
@@ -64,7 +54,6 @@ def balance_clusters(X, labels, k, cluster_size):
         cluster_selections[c].extend(selected)
         used_indices.update(selected)
 
-    # Step 3: Fill underfull clusters with closest unused points
     unused_indices = list(all_indices - used_indices)
     unused_points = X[unused_indices]
 
@@ -82,7 +71,6 @@ def balance_clusters(X, labels, k, cluster_size):
             cluster_selections[c].extend(chosen)
             used_indices.update(chosen)
 
-            # Remove used from the pool
             for idx in sorted(best_indices, reverse=True):
                 del unused_indices[idx]
                 unused_points = np.delete(unused_points, idx, axis=0)
@@ -91,7 +79,6 @@ def balance_clusters(X, labels, k, cluster_size):
 
         assert len(cluster_selections[c]) == cluster_size, f"Cluster {c} still underfilled!"
 
-    # Final flat list of all clusters
     balanced_indices = [i for cluster in cluster_selections for i in cluster]
     return balanced_indices
 

@@ -6,6 +6,9 @@ This function projects input matrix onto two block diagonal matrices L and R usi
 def project_on_monarch_matrices(M):
   n = M.size(0)
   m = int(n ** 0.5)
+
+  print(M.size())  # or M.shape
+  print(M.numel())
   assert m * m == n, "n must be a perfect square"
 
   # ensure the input is in float32 if it's in half precision
@@ -18,9 +21,12 @@ def project_on_monarch_matrices(M):
   L_blocks = []
   R_blocks = []
 
+  #for i in range(m):
   for j in range(m):
     columns_U = []
     rows_VT = []
+    # for j in range(m):
+    #   M_jk = M[i*m:i*m+m, j*m:j*m+m]  # size m x m
     for k in range(m):
       M_jk = A[:, j, k, :]  # size m x m
 
@@ -34,7 +40,7 @@ def project_on_monarch_matrices(M):
       columns_U.append(u_jk * S[0])
       rows_VT.append(v_jk.unsqueeze(0))
 
-    L_blocks.append(torch.stack(columns_U, dim=1))
+    L_blocks.append(torch.stack(columns_U, dim=1).T)
     R_blocks.append(torch.cat(rows_VT, dim=0))
 
   # convert block lists into block-diagonal matrices
@@ -56,6 +62,15 @@ def monarch_permutation_matrix(m):
   for i in range(n):
     P[i, (i % m) * m + i // m] = 1
 
+  # torch.set_printoptions(sci_mode=False, edgeitems=100, linewidth=200, threshold=10000)
+  #
+  # print("transpose")
+
+  #print("P matrix", P)
+  #B = torch.transpose(P, 0, 1)
+  #print("P.T matrix", B)
+  #assert P == torch.transpose(P, 0, 1)
+
   return P
 
 
@@ -66,11 +81,24 @@ def reconstruct_monarch_matrix(L, R, m):
   m = int(m)
 
   P = monarch_permutation_matrix(m)
-
+  # print("L ---chch")
+  # print(L)
   PL = torch.matmul(P, L)
+  # print("PL ---chch")
+  # print(PL)
+  # PLPT  = torch.matmul(PL,torch.transpose(P, 0, 1))
+  # print("PLPT ---chch")
+  # print(PLPT)
+  # PLPTR  = torch.matmul(PLPT,R)
+  # print("PLPTR ---chch")
+  # print(PLPTR)
   PTR = torch.matmul(torch.transpose(P, 0, 1), R)
+  print("PL",PL)
 
+  print("PTR",PTR)
   M = torch.matmul(PL, PTR)
+  print("Second ---chch")
+  print(M)
   return M
 
 """

@@ -43,7 +43,7 @@ def cosine_clustering(X, k, len_of_run):
     for i in range(n):
         m += xsum(x[i][j] for j in range(k)) == 1
 
-    # each cluster has k rows
+    # each cluster has n/k rows
     for j in range(k):
         m += xsum(x[i][j] for i in range(n)) == n/k
 
@@ -70,7 +70,7 @@ def cosine_clustering(X, k, len_of_run):
             if x[i][j].x == 1:
                 clusters[j].append(i)
 
-    print(clusters)
+    #print(clusters)
     return torch.tensor(clusters).flatten()
 
 def compute_clustering_permutations(X, k_rows, l_columns, len_of_run):
@@ -91,13 +91,32 @@ def compute_column_permutation(X, k, len_of_run):
     return X, P_columns
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python3 cosine_dist_mip.py <input_file_path>")
-    else:
-        input_path = sys.argv[1]
+    # if len(sys.argv) < 2:
+    #     print("Usage: python3 cosine_dist_mip.py <input_file_path>")
+    # else:
+    #     input_path = sys.argv[1]
         print("cosine_dist_mip.py")
+        input_path = "/Users/KlaudiaLichmanova/Desktop/school5/Diplomovka/codebase/master/master-thesis-pruning-dnn/substitution_into_model/fc1.pt"
         print(input_path)
 
+        X = torch.load(input_path)
+        print(X.shape)
+        len_of_run = 2000  # in seconds
+
+        P_rows, P_columns = compute_clustering_permutations(X, 4, 4, len_of_run)
+        X = X[P_rows,:]
+        X = X[:,P_columns]
+        torch.save(X, "/Users/KlaudiaLichmanova/Desktop/school5/Diplomovka/codebase/master/master-thesis-pruning-dnn/inputs/metrics/fc1_perm_2000_cosdist.pt")
+        # saving clustered matrix
+        # script_dir = os.path.dirname(os.path.abspath(__file__))
+        # output_dir = os.path.join(script_dir, "output")
+        # if not os.path.exists(output_dir):
+        #     os.makedirs(output_dir)
+        # file_name = os.path.splitext(os.path.basename(input_path))[0]
+        # save_name = f"{file_name}_{len_of_run}.pt"
+        #
+        # save_path = os.path.join(output_dir, save_name)
+        # torch.save(X, save_path)
         # X = torch.tensor([
         #     [10, 20, 30, 40, 50, 60, 70, 80, 90],  # Outlier
         #     [1, 1, 1, 1, 1, 1, 1, 1, 1],  # Cluster 4 (identical to row 7)
