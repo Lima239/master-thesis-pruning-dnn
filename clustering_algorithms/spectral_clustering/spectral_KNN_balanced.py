@@ -135,4 +135,3 @@ if __name__ == "__main__":
     P_rows, P_columns = compute_clustering_permutations_SPECTRAL_KNN_balanced(X, 4, 4)
     X = X[P_rows, :]
     X = X[:, P_columns]
-    torch.save(X,"/Users/KlaudiaLichmanova/Desktop/school5/Diplomovka/codebase/master/master-thesis-pruning-dnn/inputs/metrics/fc1_KNN2.pt")

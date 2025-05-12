@@ -106,7 +106,6 @@ if __name__ == "__main__":
         P_rows, P_columns = compute_clustering_permutations(X, 4, 4, len_of_run)
         X = X[P_rows,:]
         X = X[:,P_columns]
-        torch.save(X, "/Users/KlaudiaLichmanova/Desktop/school5/Diplomovka/codebase/master/master-thesis-pruning-dnn/inputs/metrics/fc1_perm_2000_cosdist.pt")
         # saving clustered matrix
         # script_dir = os.path.dirname(os.path.abspath(__file__))
         # output_dir = os.path.join(script_dir, "output")
